@@ -1,26 +1,31 @@
-package br.com.chronosacademy.automacaoWeb;
+package br.com.decision;
 
-import io.github.bonigarcia.wdm.WebDriverManager;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
+import java.util.Iterator;
+import java.util.Set;
+
+//import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.FixMethodOrder;
 import org.junit.Test;
+import org.junit.runners.MethodSorters;
 import org.openqa.selenium.By;
-import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.Select;
 
-import javax.xml.xpath.XPathEvaluationResult;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
+//import static java.time.Duration.ofMillis;
 
+import io.github.bonigarcia.wdm.WebDriverManager;
 
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class TesteWeb {
-    ChromeDriver driver;
-    @Before
-    public void StartDriver() {
+    static ChromeDriver driver;
+    
+    @BeforeClass
+    public static void initialize() {
+    	System.out.println("Before");
         WebDriverManager.chromedriver().setup();
         driver = new ChromeDriver();
         driver.manage().window().maximize();
@@ -28,7 +33,8 @@ public class TesteWeb {
     }
 
     @Test
-     public void primeiroTeste() {
+     public void aba_1_vehicle_data() {
+    	System.out.println("Metodo 1");
         //Aba “Enter Vehicle Data”
         WebElement selectElementMake = driver.findElement(By.id("make"));
         Select selectObject1 = new Select(selectElementMake);
@@ -59,7 +65,11 @@ public class TesteWeb {
         driver.findElement(By.id("licenseplatenumber")).sendKeys("100");
         driver.findElement(By.id("annualmileage")).sendKeys("100");
         driver.findElement(By.id("nextenterinsurantdata")).click();
-
+    }
+    
+    @Test
+    public void aba_2_enter_vichicle_data() {
+    	System.out.println("Metodo 2");
         //Aba “Enter Vehicle Data"
         driver.findElement(By.id("firstname")).sendKeys("firstname");
         driver.findElement(By.id("lastname")).sendKeys("lastname");
@@ -81,8 +91,12 @@ public class TesteWeb {
         checkbox.click();
         driver.findElement(By.id("website")).sendKeys("www.google.com");
         driver.findElement(By.id("nextenterproductdata")).click();
-
-        //Aba "Enter Product Data"
+        
+    }
+    
+    @Test
+    public void aba_3_enter_product_data() {
+    	System.out.println("Método 3");
         driver.findElement(By.id("startdate")).sendKeys("01/01/2025");
         Select oSelect = new Select(driver.findElement(By.id("insurancesum")));
         oSelect.selectByValue("7000000");
@@ -98,13 +112,21 @@ public class TesteWeb {
         Select selectObject10 = new Select(selectElementCourtesycar);
         selectObject10.selectByVisibleText("No");
         driver.findElement(By.id("nextselectpriceoption")).click();
-
+    }
+    
+    @Test
+    public void aba_4_price_option() {
+    	System.out.println("Método 4");
         //Aba "Price Option"
         driver.findElement(By.xpath("//th[2]/label[2]/span")).click();
         WebElement nextBtn = driver.findElement(By.id("nextsendquote"));
         Actions actionProvider = new Actions(driver);
         actionProvider.doubleClick(nextBtn).build().perform();
-
+    }
+    
+    @Test
+    public void aba_5_send_quote(){
+    	System.out.println("Método 5");
         //Aba Send Quote
         driver.findElement(By.id("email")).sendKeys("test@test.com");
         driver.findElement(By.id("phone")).sendKeys("123456789");
@@ -114,10 +136,45 @@ public class TesteWeb {
         driver.findElement(By.id("Comments")).sendKeys("test");
         driver.findElement(By.id("sendemail")).click();
     }
+    
+    @Test    
+    public void conferir_mensagem() {
+    	System.out.println("Teste Final");
+    	System.out.println("Thread 1");
+    	
+        try {
+			Thread.sleep(15000);
+			System.out.println("Thread 2");
+			String parentWindowHandler = driver.getWindowHandle(); // Store your parent window
+			String subWindowHandler = null;
 
-    @After
-    public void finishDriver() {
-        driver.quit();
+			Set<String> handles = driver.getWindowHandles(); // get all window handles
+			Iterator<String> iterator = handles.iterator();
+			while (iterator.hasNext()){
+			    subWindowHandler = iterator.next();
+			}
+			driver.switchTo().window(subWindowHandler); // switch to popup window
+
+			// Now you are in the popup window, perform necessary actions here
+
+//			driver.switchTo().window(parentWindowHandler);  // switch back to parent window			
+			
+	    	driver.findElementById("site-content");
+	    	System.out.println(driver.findElements(By.tagName("h2")).get(0).getText());
+	    	System.out.println("Final");
+	    	driver.switchTo().window(parentWindowHandler);  // switch back to parent window
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        
+    }
+
+    @AfterClass
+    public static void finishDriver() {
+    	
+    	System.out.println("AfterClass");
+//        driver.quit();
     }
 
     //        Assert.assertEquals("Porque Tempo É Conhecimento", titulo);
