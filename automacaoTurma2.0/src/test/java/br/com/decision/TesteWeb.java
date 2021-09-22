@@ -1,5 +1,7 @@
 package br.com.decision;
 
+import static org.junit.Assert.assertEquals;
+
 import java.util.Iterator;
 import java.util.Set;
 
@@ -15,12 +17,19 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.Select;
 
+import br.com.decision.model.Usuario;
+import io.cucumber.java.pt.Dado;
+import io.cucumber.java.pt.Entao;
+import io.cucumber.java.pt.Quando;
+
 //import static java.time.Duration.ofMillis;
 
 import io.github.bonigarcia.wdm.WebDriverManager;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class TesteWeb {
+	static Usuario usuario;
+	
     static ChromeDriver driver;
     
     @BeforeClass
@@ -30,6 +39,8 @@ public class TesteWeb {
         driver = new ChromeDriver();
         driver.manage().window().maximize();
         driver.get("http://sampleapp.tricentis.com/101/app.php");
+        
+		usuario = new Usuario("test@test.com", "123456789", "user_test", "Test123456789", "Test123456789", "testestestesteste");
     }
 
     @Test
@@ -119,25 +130,29 @@ public class TesteWeb {
     	System.out.println("Método 4");
         //Aba "Price Option"
         driver.findElement(By.xpath("//th[2]/label[2]/span")).click();
+//        driver.findElementById("nextsendquote").click();
+        
         WebElement nextBtn = driver.findElement(By.id("nextsendquote"));
         Actions actionProvider = new Actions(driver);
         actionProvider.doubleClick(nextBtn).build().perform();
     }
     
     @Test
+    @Dado("a opcao de menu 'Send Quote'")
     public void aba_5_send_quote(){
     	System.out.println("Método 5");
         //Aba Send Quote
-        driver.findElement(By.id("email")).sendKeys("test@test.com");
-        driver.findElement(By.id("phone")).sendKeys("123456789");
-        driver.findElement(By.id("username")).sendKeys("NameTest");
-        driver.findElement(By.id("password")).sendKeys("Test123");
-        driver.findElement(By.id("confirmpassword")).sendKeys("Test123");
-        driver.findElement(By.id("Comments")).sendKeys("test");
+        driver.findElement(By.id("email")).sendKeys(usuario.getEmail());
+        driver.findElement(By.id("phone")).sendKeys(usuario.getPhone());
+        driver.findElement(By.id("username")).sendKeys(usuario.getUsername());
+        driver.findElement(By.id("password")).sendKeys(usuario.getPassword());
+        driver.findElement(By.id("confirmpassword")).sendKeys(usuario.getConfirm_password());
+        driver.findElement(By.id("Comments")).sendKeys(usuario.getComments());
         driver.findElement(By.id("sendemail")).click();
     }
     
-    @Test    
+    @Test
+    @Entao("Um Popup com a mensagem \"Sending e-mail success!\" deve ser exibida")
     public void conferir_mensagem() {
     	System.out.println("Teste Final");
     	System.out.println("Thread 1");
@@ -145,30 +160,26 @@ public class TesteWeb {
         try {
 			Thread.sleep(15000);
 			System.out.println("Thread 2");
-			String parentWindowHandler = driver.getWindowHandle(); // Store your parent window
+			String parentWindowHandler = driver.getWindowHandle();
 			String subWindowHandler = null;
 
-			Set<String> handles = driver.getWindowHandles(); // get all window handles
+			Set<String> handles = driver.getWindowHandles();
 			Iterator<String> iterator = handles.iterator();
 			while (iterator.hasNext()){
 			    subWindowHandler = iterator.next();
 			}
-			driver.switchTo().window(subWindowHandler); // switch to popup window
-
-			// Now you are in the popup window, perform necessary actions here
-
-//			driver.switchTo().window(parentWindowHandler);  // switch back to parent window			
-			
+			driver.switchTo().window(subWindowHandler);	
 	    	driver.findElementById("site-content");
+	    	assertEquals("Sending e-mail success!", driver.findElements(By.tagName("h2")).get(0).getText());
 	    	System.out.println(driver.findElements(By.tagName("h2")).get(0).getText());
 	    	System.out.println("Final");
-	    	driver.switchTo().window(parentWindowHandler);  // switch back to parent window
+	    	driver.switchTo().window(parentWindowHandler);
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
         
     }
+    
 
     @AfterClass
     public static void finishDriver() {
