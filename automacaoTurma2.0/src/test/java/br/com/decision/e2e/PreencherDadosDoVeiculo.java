@@ -13,7 +13,7 @@ public class PreencherDadosDoVeiculo {
 		this.driver = driver;
 	}
 	
-	public void preencherFormulario(String marca,
+	public void preencherFormulario(ChromeDriver driver, String marca,
 			String performance, String data_fabricacao, String n_assentos,
 			String combustivel, String preco, String licenca, String milhas) {
 
